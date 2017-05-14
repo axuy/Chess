@@ -7,5 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "BSD-2-Clause"
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "babel-core": "~6.24.1",
+    "babel-preset-latest": "~6.24.1",
+    "babel-preset-react": "~6.24.1"
+  }
 }
