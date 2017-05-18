@@ -4,11 +4,9 @@ import Square from './Square.js'
 class Board extends React.Component {
   constructor() {
     super();
-    var squares = this.initializeBoard(Array(64).fill({
-      piece: null,
-      owner: null
-    }));
+    var squares = this.initializeBoard(Array(64).fill(null));
     this.state = {
+      selected: null,
       squares: squares,
       whiteToMove: true
     };
@@ -95,6 +93,17 @@ class Board extends React.Component {
   }
 
   renderSquare(cellId) {
+    if(this.state.squares[cellId] == null) {
+      return (
+        <Square
+          key={cellId}
+          cellId={cellId}
+          piece={null}
+          owner={null}
+          onClick={() => this.handleClick(cellId)}
+        />
+      );
+    }
     return (
       <Square
         key={cellId}
@@ -107,7 +116,22 @@ class Board extends React.Component {
   }
 
   handleClick(cellId) {
-    console.log(this.state.squares[cellId])
+    if(this.state.selected !== null) {
+      var newSquares = this.state.squares.slice();
+      newSquares[cellId] = {
+        piece: this.state.squares[this.state.selected].piece,
+        owner: this.state.squares[this.state.selected].owner
+      }
+      newSquares[this.state.selected] = null
+      this.setState({
+        selected: null,
+        squares: newSquares,
+        whiteToMove: !this.state.whiteToMove
+      });
+    }
+    if(this.state.squares[cellId] !== null) {
+      this.state.selected = cellId;
+    }
   }
 
   render() {
