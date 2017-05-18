@@ -10,8 +10,7 @@
   justify-content: center;
 }
 
-.black-square {
-  background: #a86103;
+.square {
   font-size: 24px;
   font-weight: bold;
   float: left;
@@ -25,28 +24,7 @@
   width: 72px;
 }
 
-.white-square {
-  background: #e8c07a;
-  font-size: 24px;
-  font-weight: bold;
-  float: left;
-  line-height: 34px;
-  height: 72px;
-  margin-right: -1px;
-  margin-top: -1px;
-  object-fit: contain;
-  padding: 0;
-  text-align: center;
-  width: 72px;
-}
-
-.white-square img {
-  height: 100%;
-  object-fit: contain;
-  width: 100%;
-}
-
-.black-square img {
+.square img {
   height: 100%;
   object-fit: contain;
   width: 100%;

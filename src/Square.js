@@ -2,17 +2,21 @@ import React from 'react'
 
 class Square extends React.Component {
   render() {
-    var squareColor = "";
+    var squareColor = '';
     if(this.props.cellId % 2 === 0 && this.props.cellId % 16 < 8 ||
        this.props.cellId % 2 === 1 && this.props.cellId % 16 > 7) {
-      squareColor = "white-square";
+      squareColor = {
+        background: "#e8c07a"
+      };
     }
     else {
-      squareColor = "black-square";
+      squareColor = {
+        background: "#a86103"
+      };
     }
     if(this.props.piece === null) {
       return (
-        <div className={squareColor} onClick={this.props.onClick}/>
+        <div className='square' style={squareColor} onClick={this.props.onClick}/>
       );
     }
     var imgSrc = "";
@@ -54,7 +58,7 @@ class Square extends React.Component {
         imgSrc = './images/black_king.png';
     }
     return (
-      <div className={squareColor} onClick={this.props.onClick}>
+      <div className="square" style={squareColor} onClick={this.props.onClick}>
         <img src={imgSrc}/>
       </div>
     );
