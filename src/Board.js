@@ -92,7 +92,325 @@ class Board extends React.Component {
     return squares;
   }
 
+  handleClick(cellId) {
+    if(this.state.selected !== null) {
+      var legalMovesOfSelected = this.getLegalMoves(this.state.selected)
+      if(legalMovesOfSelected.includes(cellId)) {
+        var newSquares = this.state.squares.slice();
+        newSquares[cellId] = {
+          piece: this.state.squares[this.state.selected].piece,
+          owner: this.state.squares[this.state.selected].owner
+        }
+        newSquares[this.state.selected] = null;
+        this.setState({
+          selected: null,
+          squares: newSquares,
+          whiteToMove: !this.state.whiteToMove
+        });
+      }
+      else {
+        this.setState({
+          selected: null
+        })
+      }
+    }
+    else if(this.state.squares[cellId] !== null) {
+      if(this.state.whiteToMove && this.state.squares[cellId].owner === "white" ||
+         !this.state.whiteToMove && this.state.squares[cellId].owner === "black") {
+        console.log(this.getLegalMoves(cellId));
+        this.setState({
+          selected: cellId
+        });
+      }
+    }
+  }
+
+  getLegalMoves(cellId) {//TODO: make sure you can't move yourself into check, castling, en passsant
+    var legalMoves = [];
+    if(this.state.squares[cellId] === null) {
+      return legalMoves;
+    }
+    switch(this.state.squares[cellId].piece) {
+      case "B":
+        var possibleMoveId = cellId + 7;
+        while(possibleMoveId < 64) {
+          if(this.state.squares[possibleMoveId] === null) {
+            legalMoves.push(possibleMoveId);
+            possibleMoveId += 7;
+          }
+          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(possibleMoveId);
+            break;
+          }
+          else {
+            break;
+          }
+        }
+        possibleMoveId = cellId - 7;
+        while(possibleMoveId > 0) {
+          if(this.state.squares[possibleMoveId] === null) {
+            legalMoves.push(possibleMoveId);
+            possibleMoveId -= 7;
+          }
+          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(possibleMoveId);
+            break;
+          }
+          else {
+            break;
+          }
+        }
+        possibleMoveId = cellId + 9;
+        while(possibleMoveId < 64) {
+          if(this.state.squares[possibleMoveId] === null) {
+            legalMoves.push(possibleMoveId);
+            possibleMoveId += 9;
+          }
+          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(possibleMoveId);
+            break;
+          }
+          else {
+            break;
+          }
+        }
+        possibleMoveId = cellId - 9;
+        while(possibleMoveId > 0) {
+          if(this.state.squares[possibleMoveId] === null) {
+            legalMoves.push(possibleMoveId);
+            possibleMoveId -= 9;
+          }
+          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(possibleMoveId);
+            break;
+          }
+          else {
+            break;
+          }
+        }
+        break;
+      case "K":
+        var possibleMoveIds = [cellId + 1, cellId - 1, cellId + 8, cellId - 8];
+        legalMoves = possibleMoveIds.filter((move) =>
+          this.state.squares[move] !== undefined && (this.state.squares[move] === null || 
+          this.state.squares[move].owner !== this.state.squares[cellId].owner)
+        );
+        break;
+      case "N":
+        var possibleMoveIds = [cellId + 17, cellId - 17, cellId + 15, cellId - 15];
+        legalMoves = possibleMoveIds.filter((move) =>
+          this.state.squares[move] !== undefined && (this.state.squares[move] === null || 
+          this.state.squares[move].owner !== this.state.squares[cellId].owner)
+        );
+        break;
+      case "P":
+        if(this.state.squares[cellId].owner === "white") {
+          if(this.state.squares[cellId - 8] === null) {
+            legalMoves.push(cellId - 8);
+            if(cellId > 47 && cellId < 56 && this.state.squares[cellId - 16] === null) {
+              legalMoves.push(cellId - 16)
+            }
+          }
+          var possibleCaptures = [cellId - 7, cellId - 9];
+          legalMoves = legalMoves.concat(possibleCaptures.filter((move) =>
+            this.state.squares[move] !== undefined && (this.state.squares[move] !== null && 
+            this.state.squares[move].owner !== this.state.squares[cellId].owner)
+          ));
+        }
+        else {
+          if(this.state.squares[cellId + 8] === null) {
+            legalMoves.push(cellId + 8);
+            if(cellId > 7 && cellId < 16 && this.state.squares[cellId + 16] === null) {
+              legalMoves.push(cellId + 16)
+            }
+          }
+          var possibleCaptures = [cellId + 7, cellId + 9];
+          legalMoves = legalMoves.concat(possibleCaptures.filter((move) =>
+            this.state.squares[move] !== undefined && (this.state.squares[move] !== null && 
+            this.state.squares[move].owner !== this.state.squares[cellId].owner)
+          ));
+        }
+        break;
+      case "Q":
+        var possibleMoveId = cellId + 7;
+        while(possibleMoveId < 64) {
+          if(this.state.squares[possibleMoveId] === null) {
+            legalMoves.push(possibleMoveId);
+            possibleMoveId += 7;
+          }
+          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(possibleMoveId);
+            break;
+          }
+          else {
+            break;
+          }
+        }
+        possibleMoveId = cellId - 7;
+        while(possibleMoveId > 0) {
+          if(this.state.squares[possibleMoveId] === null) {
+            legalMoves.push(possibleMoveId);
+            possibleMoveId -= 7;
+          }
+          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(possibleMoveId);
+            break;
+          }
+          else {
+            break;
+          }
+        }
+        possibleMoveId = cellId + 9;
+        while(possibleMoveId < 64) {
+          if(this.state.squares[possibleMoveId] === null) {
+            legalMoves.push(possibleMoveId);
+            possibleMoveId += 9;
+          }
+          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(possibleMoveId);
+            break;
+          }
+          else {
+            break;
+          }
+        }
+        possibleMoveId = cellId - 9;
+        while(possibleMoveId > 0) {
+          if(this.state.squares[possibleMoveId] === null) {
+            legalMoves.push(possibleMoveId);
+            possibleMoveId -= 9;
+          }
+          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(possibleMoveId);
+            break;
+          }
+          else {
+            break;
+          }
+        }
+        possibleMoveId = cellId + 1;
+        while(possibleMoveId < 64) {
+          if(this.state.squares[possibleMoveId] === null) {
+            legalMoves.push(possibleMoveId);
+            possibleMoveId += 1;
+          }
+          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(possibleMoveId);
+            break;
+          }
+          else {
+            break;
+          }
+        }
+        possibleMoveId = cellId - 1;
+        while(possibleMoveId > 0) {
+          if(this.state.squares[possibleMoveId] === null) {
+            legalMoves.push(possibleMoveId);
+            possibleMoveId -= 1;
+          }
+          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(possibleMoveId);
+            break;
+          }
+          else {
+            break;
+          }
+        }
+        possibleMoveId = cellId + 8;
+        while(possibleMoveId < 64) {
+          if(this.state.squares[possibleMoveId] === null) {
+            legalMoves.push(possibleMoveId);
+            possibleMoveId += 8;
+          }
+          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(possibleMoveId);
+            break;
+          }
+          else {
+            break;
+          }
+        }
+        possibleMoveId = cellId - 8;
+        while(possibleMoveId > 0) {
+          if(this.state.squares[possibleMoveId] === null) {
+            legalMoves.push(possibleMoveId);
+            possibleMoveId -= 8;
+          }
+          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(possibleMoveId);
+            break;
+          }
+          else {
+            break;
+          }
+        }
+        break;
+      case "R":
+        var possibleMoveId = cellId + 1;
+        while(possibleMoveId < 64) {
+          if(this.state.squares[possibleMoveId] === null) {
+            legalMoves.push(possibleMoveId);
+            possibleMoveId += 1;
+          }
+          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(possibleMoveId);
+            break;
+          }
+          else {
+            break;
+          }
+        }
+        possibleMoveId = cellId - 1;
+        while(possibleMoveId > 0) {
+          if(this.state.squares[possibleMoveId] === null) {
+            legalMoves.push(possibleMoveId);
+            possibleMoveId -= 1;
+          }
+          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(possibleMoveId);
+            break;
+          }
+          else {
+            break;
+          }
+        }
+        possibleMoveId = cellId + 8;
+        while(possibleMoveId < 64) {
+          if(this.state.squares[possibleMoveId] === null) {
+            legalMoves.push(possibleMoveId);
+            possibleMoveId += 8;
+          }
+          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(possibleMoveId);
+            break;
+          }
+          else {
+            break;
+          }
+        }
+        possibleMoveId = cellId - 8;
+        while(possibleMoveId > 0) {
+          if(this.state.squares[possibleMoveId] === null) {
+            legalMoves.push(possibleMoveId);
+            possibleMoveId -= 8;
+          }
+          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(possibleMoveId);
+            break;
+          }
+          else {
+            break;
+          }
+        }
+    }
+    return legalMoves;
+  }
+
   renderSquare(cellId) {
+    var isPossibleMove = false;
+    if(this.state.selected !== null) {
+      isPossibleMove = this.getLegalMoves(this.state.selected).filter((move) => move === cellId).length > 0;
+    }
     if(this.state.squares[cellId] == null) {
       return (
         <Square
@@ -100,6 +418,8 @@ class Board extends React.Component {
           cellId={cellId}
           piece={null}
           owner={null}
+          isPossibleMove={isPossibleMove}
+          isSelected={false}
           onClick={() => this.handleClick(cellId)}
         />
       );
@@ -110,28 +430,11 @@ class Board extends React.Component {
         cellId={cellId}
         piece={this.state.squares[cellId].piece}
         owner={this.state.squares[cellId].owner}
+        isPossibleMove={isPossibleMove}
+        isSelected={(cellId === this.state.selected)}
         onClick={() => this.handleClick(cellId)}
       />
     );
-  }
-
-  handleClick(cellId) {
-    if(this.state.selected !== null) {
-      var newSquares = this.state.squares.slice();
-      newSquares[cellId] = {
-        piece: this.state.squares[this.state.selected].piece,
-        owner: this.state.squares[this.state.selected].owner
-      }
-      newSquares[this.state.selected] = null
-      this.setState({
-        selected: null,
-        squares: newSquares,
-        whiteToMove: !this.state.whiteToMove
-      });
-    }
-    if(this.state.squares[cellId] !== null) {
-      this.state.selected = cellId;
-    }
   }
 
   render() {
