@@ -117,7 +117,6 @@ class Board extends React.Component {
     else if(this.state.squares[cellId] !== null) {
       if(this.state.whiteToMove && this.state.squares[cellId].owner === "white" ||
          !this.state.whiteToMove && this.state.squares[cellId].owner === "black") {
-        console.log(this.getLegalMoves(cellId));
         this.setState({
           selected: cellId
         });
@@ -130,77 +129,119 @@ class Board extends React.Component {
     if(this.state.squares[cellId] === null) {
       return legalMoves;
     }
+    var x = cellId % 8;
+    var y = Math.floor(cellId / 8);
     switch(this.state.squares[cellId].piece) {
       case "B":
-        var possibleMoveId = cellId + 7;
-        while(possibleMoveId < 64) {
-          if(this.state.squares[possibleMoveId] === null) {
-            legalMoves.push(possibleMoveId);
-            possibleMoveId += 7;
+        var i = 1;
+        while(true) {
+          if(x + i > 7 || y + i > 7) {
+            break;
           }
-          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
-            legalMoves.push(possibleMoveId);
+          var key = x + i + (y + i) * 8;
+          if(this.state.squares[key] === null) {
+            legalMoves.push(key);
+          }
+          else if(this.state.squares[key].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(key);
             break;
           }
           else {
             break;
           }
+          i++;
         }
-        possibleMoveId = cellId - 7;
-        while(possibleMoveId > 0) {
-          if(this.state.squares[possibleMoveId] === null) {
-            legalMoves.push(possibleMoveId);
-            possibleMoveId -= 7;
+        i = 1;
+        while(true) {
+          if(x - i < 0 || y - i < 0) {
+            break;
           }
-          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
-            legalMoves.push(possibleMoveId);
+          var key = x - i + (y - i) * 8;
+          if(this.state.squares[key] === null) {
+            legalMoves.push(key);
+          }
+          else if(this.state.squares[key].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(key);
             break;
           }
           else {
             break;
           }
+          i++;
         }
-        possibleMoveId = cellId + 9;
-        while(possibleMoveId < 64) {
-          if(this.state.squares[possibleMoveId] === null) {
-            legalMoves.push(possibleMoveId);
-            possibleMoveId += 9;
+        i = 1;
+        while(true) {
+          if(x + i > 7 || y - i < 0) {
+            break;
           }
-          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
-            legalMoves.push(possibleMoveId);
+          var key = x + i + (y - i) * 8;
+          if(this.state.squares[key] === null) {
+            legalMoves.push(key);
+          }
+          else if(this.state.squares[key].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(key);
             break;
           }
           else {
             break;
           }
+          i++;
         }
-        possibleMoveId = cellId - 9;
-        while(possibleMoveId > 0) {
-          if(this.state.squares[possibleMoveId] === null) {
-            legalMoves.push(possibleMoveId);
-            possibleMoveId -= 9;
+        i = 1;
+        while(true) {
+          if(x - i < 0 || y + i > 7) {
+            break;
           }
-          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
-            legalMoves.push(possibleMoveId);
+          var key = x - i + (y + i) * 8;
+          if(this.state.squares[key] === null) {
+            legalMoves.push(key);
+          }
+          else if(this.state.squares[key].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(key);
             break;
           }
           else {
             break;
           }
+          i++;
         }
         break;
       case "K":
-        var possibleMoveIds = [cellId + 1, cellId - 1, cellId + 8, cellId - 8];
-        legalMoves = possibleMoveIds.filter((move) =>
-          this.state.squares[move] !== undefined && (this.state.squares[move] === null || 
-          this.state.squares[move].owner !== this.state.squares[cellId].owner)
+        var possibleMoves = [
+          {x: x + 1, y: y},
+          {x: x - 1, y: y},
+          {x: x, y: y + 1},
+          {x: x, y: y - 1},
+          {x: x + 1, y: y + 1},
+          {x: x - 1, y: y - 1},
+          {x: x + 1, y: y - 1},
+          {x: x - 1, y: y + 1}
+        ];
+        legalMoves = possibleMoves.filter((move) =>
+          move.x >= 0 && move.x < 8 && move.y >= 0 && move.y < 8 &&
+          (this.state.squares[move.x + move.y * 8] === null ||
+          this.state.squares[move.x + move.y * 8].owner !== this.state.squares[cellId].owner)  
+        ).map((move) =>
+          move.x + move.y * 8
         );
         break;
       case "N":
-        var possibleMoveIds = [cellId + 17, cellId - 17, cellId + 15, cellId - 15];
-        legalMoves = possibleMoveIds.filter((move) =>
-          this.state.squares[move] !== undefined && (this.state.squares[move] === null || 
-          this.state.squares[move].owner !== this.state.squares[cellId].owner)
+        var possibleMoves = [
+          {x: x + 1, y: y + 2},
+          {x: x - 1, y: y + 2},
+          {x: x + 1, y: y - 2},
+          {x: x - 1, y: y - 2},
+          {x: x + 2, y: y + 1},
+          {x: x - 2, y: y + 1},
+          {x: x + 2, y: y - 1},
+          {x: x - 2, y: y - 1}
+        ];
+        legalMoves = possibleMoves.filter((move) =>
+          move.x >= 0 && move.x < 8 && move.y >= 0 && move.y < 8 &&
+          (this.state.squares[move.x + move.y * 8] === null ||
+          this.state.squares[move.x + move.y * 8].owner !== this.state.squares[cellId].owner)  
+        ).map((move) =>
+          move.x + move.y * 8
         );
         break;
       case "P":
@@ -211,10 +252,16 @@ class Board extends React.Component {
               legalMoves.push(cellId - 16)
             }
           }
-          var possibleCaptures = [cellId - 7, cellId - 9];
+          var possibleCaptures = [
+            {x: x - 1, y: y - 1},
+            {x: x + 1, y: y - 1}
+          ];
           legalMoves = legalMoves.concat(possibleCaptures.filter((move) =>
-            this.state.squares[move] !== undefined && (this.state.squares[move] !== null && 
-            this.state.squares[move].owner !== this.state.squares[cellId].owner)
+            move.x >= 0 && move.x < 8 && move.y >= 0 && move.y < 8 &&
+            this.state.squares[move.x + move.y * 8] !== null &&
+            this.state.squares[move.x + move.y * 8].owner !== this.state.squares[cellId].owner
+          ).map((move) =>
+            move.x + move.y * 8
           ));
         }
         else {
@@ -224,183 +271,237 @@ class Board extends React.Component {
               legalMoves.push(cellId + 16)
             }
           }
-          var possibleCaptures = [cellId + 7, cellId + 9];
+          var possibleCaptures = [
+            {x: x - 1, y: y + 1},
+            {x: x + 1, y: y + 1}
+          ];
           legalMoves = legalMoves.concat(possibleCaptures.filter((move) =>
-            this.state.squares[move] !== undefined && (this.state.squares[move] !== null && 
-            this.state.squares[move].owner !== this.state.squares[cellId].owner)
+            move.x >= 0 && move.x < 8 && move.y >= 0 && move.y < 8 &&
+            this.state.squares[move.x + move.y * 8] !== null &&
+            this.state.squares[move.x + move.y * 8].owner !== this.state.squares[cellId].owner
+          ).map((move) =>
+            move.x + move.y * 8
           ));
         }
         break;
       case "Q":
-        var possibleMoveId = cellId + 7;
-        while(possibleMoveId < 64) {
-          if(this.state.squares[possibleMoveId] === null) {
-            legalMoves.push(possibleMoveId);
-            possibleMoveId += 7;
+        var i = 1;
+        while(true) {
+          if(x + i > 7) {
+            break;
           }
-          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
-            legalMoves.push(possibleMoveId);
+          var key = x + i + y * 8;
+          if(this.state.squares[key] === null) {
+            legalMoves.push(key);
+          }
+          else if(this.state.squares[key].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(key);
             break;
           }
           else {
             break;
           }
+          i++;
         }
-        possibleMoveId = cellId - 7;
-        while(possibleMoveId > 0) {
-          if(this.state.squares[possibleMoveId] === null) {
-            legalMoves.push(possibleMoveId);
-            possibleMoveId -= 7;
+        i = 1;
+        while(true) {
+          if(x - i < 0) {
+            break;
           }
-          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
-            legalMoves.push(possibleMoveId);
+          var key = x - i + y * 8;
+          if(this.state.squares[key] === null) {
+            legalMoves.push(key);
+          }
+          else if(this.state.squares[key].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(key);
             break;
           }
           else {
             break;
           }
+          i++;
         }
-        possibleMoveId = cellId + 9;
-        while(possibleMoveId < 64) {
-          if(this.state.squares[possibleMoveId] === null) {
-            legalMoves.push(possibleMoveId);
-            possibleMoveId += 9;
+        i = 1;
+        while(true) {
+          if(y + i > 7) {
+            break;
           }
-          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
-            legalMoves.push(possibleMoveId);
+          var key = x + (y + i) * 8;
+          if(this.state.squares[key] === null) {
+            legalMoves.push(key);
+          }
+          else if(this.state.squares[key].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(key);
             break;
           }
           else {
             break;
           }
+          i++;
         }
-        possibleMoveId = cellId - 9;
-        while(possibleMoveId > 0) {
-          if(this.state.squares[possibleMoveId] === null) {
-            legalMoves.push(possibleMoveId);
-            possibleMoveId -= 9;
+        i = 1;
+        while(true) {
+          if(y - i < 0) {
+            break;
           }
-          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
-            legalMoves.push(possibleMoveId);
+          var key = x + (y - i) * 8;
+          if(this.state.squares[key] === null) {
+            legalMoves.push(key);
+          }
+          else if(this.state.squares[key].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(key);
             break;
           }
           else {
             break;
           }
+          i++;
         }
-        possibleMoveId = cellId + 1;
-        while(possibleMoveId < 64) {
-          if(this.state.squares[possibleMoveId] === null) {
-            legalMoves.push(possibleMoveId);
-            possibleMoveId += 1;
+        i = 1;
+        while(true) {
+          if(x + i > 7 || y + i > 7) {
+            break;
           }
-          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
-            legalMoves.push(possibleMoveId);
+          var key = x + i + (y + i) * 8;
+          if(this.state.squares[key] === null) {
+            legalMoves.push(key);
+          }
+          else if(this.state.squares[key].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(key);
             break;
           }
           else {
             break;
           }
+          i++;
         }
-        possibleMoveId = cellId - 1;
-        while(possibleMoveId > 0) {
-          if(this.state.squares[possibleMoveId] === null) {
-            legalMoves.push(possibleMoveId);
-            possibleMoveId -= 1;
+        i = 1;
+        while(true) {
+          if(x - i < 0 || y - i < 0) {
+            break;
           }
-          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
-            legalMoves.push(possibleMoveId);
+          var key = x - i + (y - i) * 8;
+          if(this.state.squares[key] === null) {
+            legalMoves.push(key);
+          }
+          else if(this.state.squares[key].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(key);
             break;
           }
           else {
             break;
           }
+          i++;
         }
-        possibleMoveId = cellId + 8;
-        while(possibleMoveId < 64) {
-          if(this.state.squares[possibleMoveId] === null) {
-            legalMoves.push(possibleMoveId);
-            possibleMoveId += 8;
+        i = 1;
+        while(true) {
+          if(x + i > 7 || y - i < 0) {
+            break;
           }
-          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
-            legalMoves.push(possibleMoveId);
+          var key = x + i + (y - i) * 8;
+          if(this.state.squares[key] === null) {
+            legalMoves.push(key);
+          }
+          else if(this.state.squares[key].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(key);
             break;
           }
           else {
             break;
           }
+          i++;
         }
-        possibleMoveId = cellId - 8;
-        while(possibleMoveId > 0) {
-          if(this.state.squares[possibleMoveId] === null) {
-            legalMoves.push(possibleMoveId);
-            possibleMoveId -= 8;
+        i = 1;
+        while(true) {
+          if(x - i < 0 || y + i > 7) {
+            break;
           }
-          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
-            legalMoves.push(possibleMoveId);
+          var key = x - i + (y + i) * 8;
+          if(this.state.squares[key] === null) {
+            legalMoves.push(key);
+          }
+          else if(this.state.squares[key].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(key);
             break;
           }
           else {
             break;
           }
+          i++;
         }
         break;
       case "R":
-        var possibleMoveId = cellId + 1;
-        while(possibleMoveId < 64) {
-          if(this.state.squares[possibleMoveId] === null) {
-            legalMoves.push(possibleMoveId);
-            possibleMoveId += 1;
+        var i = 1;
+        while(true) {
+          if(x + i > 7) {
+            break;
           }
-          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
-            legalMoves.push(possibleMoveId);
+          var key = x + i + y * 8;
+          if(this.state.squares[key] === null) {
+            legalMoves.push(key);
+          }
+          else if(this.state.squares[key].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(key);
             break;
           }
           else {
             break;
           }
+          i++;
         }
-        possibleMoveId = cellId - 1;
-        while(possibleMoveId > 0) {
-          if(this.state.squares[possibleMoveId] === null) {
-            legalMoves.push(possibleMoveId);
-            possibleMoveId -= 1;
+        i = 1;
+        while(true) {
+          if(x - i < 0) {
+            break;
           }
-          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
-            legalMoves.push(possibleMoveId);
+          var key = x - i + y * 8;
+          if(this.state.squares[key] === null) {
+            legalMoves.push(key);
+          }
+          else if(this.state.squares[key].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(key);
             break;
           }
           else {
             break;
           }
+          i++;
         }
-        possibleMoveId = cellId + 8;
-        while(possibleMoveId < 64) {
-          if(this.state.squares[possibleMoveId] === null) {
-            legalMoves.push(possibleMoveId);
-            possibleMoveId += 8;
+        i = 1;
+        while(true) {
+          if(y + i > 7) {
+            break;
           }
-          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
-            legalMoves.push(possibleMoveId);
+          var key = x + (y + i) * 8;
+          if(this.state.squares[key] === null) {
+            legalMoves.push(key);
+          }
+          else if(this.state.squares[key].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(key);
             break;
           }
           else {
             break;
           }
+          i++;
         }
-        possibleMoveId = cellId - 8;
-        while(possibleMoveId > 0) {
-          if(this.state.squares[possibleMoveId] === null) {
-            legalMoves.push(possibleMoveId);
-            possibleMoveId -= 8;
+        i = 1;
+        while(true) {
+          if(y - i < 0) {
+            break;
           }
-          else if(this.state.squares[possibleMoveId].owner !== this.state.squares[cellId].owner) {
-            legalMoves.push(possibleMoveId);
+          var key = x + (y - i) * 8;
+          if(this.state.squares[key] === null) {
+            legalMoves.push(key);
+          }
+          else if(this.state.squares[key].owner !== this.state.squares[cellId].owner) {
+            legalMoves.push(key);
             break;
           }
           else {
             break;
           }
+          i++;
         }
     }
     return legalMoves;
@@ -409,7 +510,7 @@ class Board extends React.Component {
   renderSquare(cellId) {
     var isPossibleMove = false;
     if(this.state.selected !== null) {
-      isPossibleMove = this.getLegalMoves(this.state.selected).filter((move) => move === cellId).length > 0;
+      isPossibleMove = this.getLegalMoves(this.state.selected).includes(cellId);
     }
     if(this.state.squares[cellId] == null) {
       return (
@@ -484,7 +585,7 @@ class Board extends React.Component {
           }
         }
         else {
-          columns.push(this.renderSquare(cellId, null))
+          columns.push(this.renderSquare(cellId))
         }
         cellId++
       }
