@@ -1,5 +1,5 @@
 import React from 'react';
-import Square from './Square.js'
+import Square from './Square.js';
  
 class Board extends React.Component {
   constructor() {
@@ -95,7 +95,7 @@ class Board extends React.Component {
     return squares;
   }
 
-  handleClick(cellId) {
+  handleClick(cellId) { //TODO: figure out how to handle pawn promotion
     if(this.state.selected !== null) {
       var legalMovesOfSelected = this.getLegalMoves(this.state.selected)
       if(legalMovesOfSelected.includes(cellId)) {
@@ -105,8 +105,8 @@ class Board extends React.Component {
           owner: this.state.squares[this.state.selected].owner
         }
         newSquares[this.state.selected] = null;
-        if(this.state.squares[this.state.selected].piece == "K") {
-          if(this.state.whiteCanCastle && cellId == 62 && this.state.squares[63].owner == "white") {
+        if(this.state.squares[this.state.selected].piece === "K") {
+          if(this.state.whiteCanCastle && cellId === 62 && this.state.squares[63].owner === "white") {
             newSquares[63] = null;
             newSquares[61] = {
               piece: "R",
@@ -119,7 +119,7 @@ class Board extends React.Component {
               whiteCanCastle: false,
               whiteToMove: !this.state.whiteToMove
             });
-          } else if(this.state.blackCanCastle && cellId == 6 && this.state.squares[7].owner == "black") {
+          } else if(this.state.blackCanCastle && cellId === 6 && this.state.squares[7].owner === "black") {
             newSquares[7] = null;
             newSquares[5] = {
               piece: "R",
@@ -132,7 +132,7 @@ class Board extends React.Component {
               whiteCanCastle: false,
               whiteToMove: !this.state.whiteToMove
             });
-          } else if(this.state.squares[this.state.selected].owner == "white") {
+          } else if(this.state.squares[this.state.selected].owner === "white") {
             this.setState({
               canEnPassantPawn: null,
               selected: null,
@@ -149,8 +149,8 @@ class Board extends React.Component {
               whiteToMove: !this.state.whiteToMove,
             });
           }
-        } else if(this.state.squares[this.state.selected].piece == "R") {
-          if(this.state.squares[this.state.selected].owner == "white") {
+        } else if(this.state.squares[this.state.selected].piece === "R") {
+          if(this.state.squares[this.state.selected].owner === "white") {
             this.setState({
               canEnPassantPawn: null,
               selected: null,
@@ -168,10 +168,25 @@ class Board extends React.Component {
               blackCanCastle: false
             });
           }
-        } else if(this.state.squares[this.state.selected].piece == "P" &&
-          (this.state.selected + 16 == cellId || this.state.selected - 16 == cellId)) {
+        } else if(this.state.squares[this.state.selected].piece === "P") {
+          if(this.state.selected + 16 === cellId || this.state.selected - 16 === cellId) {
+            this.setState({
+              canEnPassantPawn: cellId,
+              selected: null,
+              squares: newSquares,
+              whiteToMove: !this.state.whiteToMove
+            });
+            return;
+          } else if(this.state.selected % 8 !== cellId % 8 && this.state.squares[cellId] === null) { //en passant
+            if(this.state.whiteToMove) {
+              newSquares[cellId + 8] = null;
+            }
+            else {
+              newSquares[cellId - 8] = null;
+            }
+          }
           this.setState({
-            canEnPassantPawn: cellId,
+            canEnPassantPawn: null,
             selected: null,
             squares: newSquares,
             whiteToMove: !this.state.whiteToMove
@@ -201,7 +216,7 @@ class Board extends React.Component {
     }
   }
 
-  getLegalMoves(cellId) {//TODO: make sure you can't move yourself into check, castling, en passsant
+  getLegalMoves(cellId) {//TODO: make sure you can't move yourself into check
     var legalMoves = [];
     if(this.state.squares[cellId] === null) {
       return legalMoves;
@@ -345,6 +360,13 @@ class Board extends React.Component {
           ).map((move) =>
             move.x + move.y * 8
           ));
+          if(Math.floor(cellId / 8) === Math.floor(this.state.canEnPassantPawn / 8)) {
+            if(cellId === this.state.canEnPassantPawn - 1 && this.state.squares[cellId - 7] === null) {
+              legalMoves.push(cellId - 7);
+            } else if(cellId === this.state.canEnPassantPawn + 1 && this.state.squares[cellId - 9] === null) {
+              legalMoves.push(cellId - 9);
+            }
+          }
         }
         else {
           if(this.state.squares[cellId + 8] === null) {
@@ -364,6 +386,13 @@ class Board extends React.Component {
           ).map((move) =>
             move.x + move.y * 8
           ));
+          if(Math.floor(cellId / 8) === Math.floor(this.state.canEnPassantPawn / 8)) {
+            if(cellId === this.state.canEnPassantPawn - 1 && this.state.squares[cellId + 9] === null) {
+              legalMoves.push(cellId + 9);
+            } else if(cellId === this.state.canEnPassantPawn + 1 && this.state.squares[cellId + 7] === null) {
+              legalMoves.push(cellId + 7);
+            }
+          }
         }
         break;
       case "Q":
@@ -594,7 +623,7 @@ class Board extends React.Component {
     if(this.state.selected !== null) {
       isPossibleMove = this.getLegalMoves(this.state.selected).includes(cellId);
     }
-    if(this.state.squares[cellId] == null) {
+    if(this.state.squares[cellId] === null) {
       return (
         <Square
           key={cellId}
