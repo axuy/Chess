@@ -6,12 +6,14 @@ class Board extends React.Component {
     super();
     var squares = this.initializeBoard(Array(64).fill(null));
     this.state = {
-      blackCanCastle: true,
+      blackCanCastleLong: true,
+      blackCanCastleShort: true,
       canEnPassantPawn: null,
       selected: null,
       squares: squares,
-      whiteToMove: true,
-      whiteCanCastle: true
+      whiteCanCastleLong: true,
+      whiteCanCastleShort: true,
+      whiteToMove: true
     };
   }
 
@@ -106,7 +108,7 @@ class Board extends React.Component {
         }
         newSquares[this.state.selected] = null;
         if(this.state.squares[this.state.selected].piece === "K") {
-          if(this.state.whiteCanCastle && cellId === 62 && this.state.squares[63].owner === "white") {
+          if(this.state.whiteCanCastleShort && cellId === 62) {
             newSquares[63] = null;
             newSquares[61] = {
               piece: "R",
@@ -116,20 +118,50 @@ class Board extends React.Component {
               canEnPassantPawn: null,
               selected: null,
               squares: newSquares,
-              whiteCanCastle: false,
+              whiteCanCastleLong: false,
+              whiteCanCastleShort: false,
               whiteToMove: !this.state.whiteToMove
             });
-          } else if(this.state.blackCanCastle && cellId === 6 && this.state.squares[7].owner === "black") {
+          } else if(this.state.blackCanCastleShort && cellId === 6) {
             newSquares[7] = null;
             newSquares[5] = {
               piece: "R",
               owner: "black"
             };
             this.setState({
+              blackCanCastleLong: false,
+              blackCanCastleShort: false,
               canEnPassantPawn: null,
               selected: null,
               squares: newSquares,
-              whiteCanCastle: false,
+              whiteToMove: !this.state.whiteToMove
+            });
+          } else if(this.state.whiteCanCastleLong && cellId === 58) {
+            newSquares[56] = null;
+            newSquares[59] = {
+              piece: "R",
+              owner: "white"
+            };
+            this.setState({
+              canEnPassantPawn: null,
+              selected: null,
+              squares: newSquares,
+              whiteCanCastleLong: false,
+              whiteCanCastleShort: false,
+              whiteToMove: !this.state.whiteToMove
+            });
+          } else if(this.state.blackCanCastleLong && cellId === 2) {
+            newSquares[0] = null;
+            newSquares[3] = {
+              piece: "R",
+              owner: "black"
+            };
+            this.setState({
+              blackCanCastleLong: false,
+              blackCanCastleShort: false,
+              canEnPassantPawn: null,
+              selected: null,
+              squares: newSquares,
               whiteToMove: !this.state.whiteToMove
             });
           } else if(this.state.squares[this.state.selected].owner === "white") {
@@ -137,13 +169,15 @@ class Board extends React.Component {
               canEnPassantPawn: null,
               selected: null,
               squares: newSquares,
-              whiteCanCastle: false,
+              whiteCanCastleLong: false,
+              whiteCanCastleShort: false,
               whiteToMove: !this.state.whiteToMove
             });
           } else {
             this.setState({
               canEnPassantPawn: null,
-              blackCanCastle: false,
+              blackCanCastleLong: false,
+              blackCanCastleShort: false,
               selected: null,
               squares: newSquares,
               whiteToMove: !this.state.whiteToMove,
@@ -155,7 +189,7 @@ class Board extends React.Component {
               canEnPassantPawn: null,
               selected: null,
               squares: newSquares,
-              whiteCanCastle: false,
+              whiteCanCastleShort: false,
               whiteToMove: !this.state.whiteToMove
             });
           } else {
@@ -163,9 +197,9 @@ class Board extends React.Component {
               canEnPassantPawn: null,
               selected: null,
               squares: newSquares,
-              whiteCanCastle: false,
+              whiteCanCastleShort: false,
               whiteToMove: !this.state.whiteToMove,
-              blackCanCastle: false
+              blackCanCastleShort: false
             });
           }
         } else if(this.state.squares[this.state.selected].piece === "P") {
@@ -216,7 +250,47 @@ class Board extends React.Component {
     }
   }
 
-  getLegalMoves(cellId) {//TODO: make sure you can't move yourself into check
+  piecesAttackingSquare(cellId, isAttackedByWhite) {
+    var pieces = [];
+    if(isAttackedByWhite) {
+      for (var i = 0; i < this.state.squares.length; i++) {
+        if(this.state.squares[i] !== null && this.state.squares[i].owner === "white" && this.getLegalMoves(i).includes(cellId)) {
+          pieces.push(i);
+        }
+      }
+    } else {
+      for (var i = 0; i < this.state.squares.length; i++) {
+        if(this.state.squares[i] !== null && this.state.squares[i].owner === "black" && this.getLegalMoves(i).includes(cellId)) {
+          pieces.push(i);
+        }
+      }
+    }
+    return pieces;
+  }
+
+  playerCanCastleLong() {
+    if(this.state.whiteToMove) {
+      return this.state.whiteCanCastleLong &&
+             this.state.squares[57] === null && this.state.squares[58] === null && this.state.squares[59] === null &&
+             this.state.squares[56].owner === "white";
+    } else {
+      return this.state.blackCanCastleLong &&
+             this.state.squares[1] === null && this.state.squares[2] === null && this.state.squares[3] === null &&
+             this.state.squares[0].owner === "black";
+    }
+  }
+
+  playerCanCastleShort() {
+    if(this.state.whiteToMove) {
+      return this.state.whiteCanCastleShort && this.state.squares[62] === null && this.state.squares[61] === null &&
+             this.state.squares[63].owner === "white";
+    } else {
+      return this.state.blackCanCastleShort && this.state.squares[6] === null && this.state.squares[5] === null &&
+             this.state.squares[7].owner === "black";
+    }
+  }
+
+  getLegalMoves(cellId) {//TODO: make sure you can't move yourself into check, queenside castle, stricter castling
     var legalMoves = [];
     if(this.state.squares[cellId] === null) {
       return legalMoves;
@@ -316,10 +390,20 @@ class Board extends React.Component {
         ).map((move) =>
           move.x + move.y * 8
         );
-        if(this.state.whiteToMove && this.state.whiteCanCastle) {
-          legalMoves.push(62);
-        } else if (!this.state.whiteToMove && this.state.blackCanCastle) {
-          legalMoves.push(6);
+        if(this.state.whiteToMove) {
+          if(this.playerCanCastleLong()) {
+            legalMoves.push(58);
+          }
+          if(this.playerCanCastleShort()) {
+            legalMoves.push(62);
+          }
+        } else {
+          if(this.playerCanCastleLong()) {
+            legalMoves.push(2);
+          }
+          if(this.playerCanCastleShort()) {
+            legalMoves.push(6);
+          }
         }
         break;
       case "N":
